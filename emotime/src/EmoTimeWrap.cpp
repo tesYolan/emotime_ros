@@ -69,7 +69,7 @@ public:
  // Subscrive to input video feed and publish output video feed
     image_sub_ = it_.subscribe("/usb_cam/image_raw", 1, 
       &EmoTimeWrap::imageCb, this);
-      image_pub_ = it_.advertise("/image_converter/output_video", 1);
+      image_pub_ = it_.advertise("/emotime_node/output_video", 1);
       emotion_pub = nh_.advertise<std_msgs::String>("chatter", 1000);
       method= "svm";
       config = "/home/lina/Desktop/emotime_final/emotime/resources/haarcascade_frontalface_cbcl1.xml";
@@ -80,14 +80,14 @@ public:
     nlambdas= 5; 
     nthetas = 8; 
     
-classifier_paths.push_back("/home/lina/svm/anger_vs_contempt_disgust_fear_happy_neutral_sadness_surprise_feats.xml");
-classifier_paths.push_back("/home/lina/svm/contempt_vs_anger_disgust_fear_happy_neutral_sadness_surprise_feats.xml");
-classifier_paths.push_back("/home/lina/svm/disgust_vs_anger_contempt_fear_happy_neutral_sadness_surprise_feats.xml");
-classifier_paths.push_back("/home/lina/svm/fear_vs_anger_contempt_disgust_happy_neutral_sadness_surprise_feats.xml");
-classifier_paths.push_back("/home/lina/svm/happy_vs_anger_contempt_disgust_fear_neutral_sadness_surprise_feats.xml");
-classifier_paths.push_back("/home/lina/svm/neutral_vs_anger_contempt_disgust_fear_happy_sadness_surprise_feats.xml");
-classifier_paths.push_back("/home/lina/svm/sadness_vs_anger_contempt_disgust_fear_happy_neutral_surprise_feats.xml");
-classifier_paths.push_back("/home/lina/svm/surprise_vs_anger_contempt_disgust_fear_happy_neutral_sadness_feats.xml");
+classifier_paths.push_back("../svm/anger_vs_contempt_disgust_fear_happy_neutral_sadness_surprise_feats.xml");
+classifier_paths.push_back("../svm/contempt_vs_anger_disgust_fear_happy_neutral_sadness_surprise_feats.xml");
+classifier_paths.push_back("../svm/disgust_vs_anger_contempt_fear_happy_neutral_sadness_surprise_feats.xml");
+classifier_paths.push_back("../svm/fear_vs_anger_contempt_disgust_happy_neutral_sadness_surprise_feats.xml");
+classifier_paths.push_back("../svm/happy_vs_anger_contempt_disgust_fear_neutral_sadness_surprise_feats.xml");
+classifier_paths.push_back("../svm/neutral_vs_anger_contempt_disgust_fear_happy_sadness_surprise_feats.xml");
+classifier_paths.push_back("../svm/sadness_vs_anger_contempt_disgust_fear_happy_neutral_surprise_feats.xml");
+classifier_paths.push_back("../svm/surprise_vs_anger_contempt_disgust_fear_happy_neutral_sadness_feats.xml");
 
 cout<<"Length of the classifiers: "<<classifier_paths.size()<<std::endl; 
      preprocessor = new FacePreProcessor(config, config_e, size.width,
