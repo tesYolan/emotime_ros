@@ -16,9 +16,11 @@ https://github.com/luca-m/emotime.git
 
 #running emotime ros
 - start the ros master
- >roscore
+ roscore
+
 -set camera pixel format and start the camera
-> rosparam set usb_cam/pixel_format yuyv
-> rosrun usb_cam usb_cam_node
+ rosparam set usb_cam/pixel_format yuyv
+ rosrun usb_cam usb_cam_node
+ 
 -run emotime node
-> rosrun emotime emotime_node
+ rosrun emotime emotime_node
