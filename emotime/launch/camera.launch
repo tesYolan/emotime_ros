@@ -9,9 +9,4 @@
     </node>
 </launch>
 
-    <arg name="choose_web_cam" default="True"/>
-    <group if="$(arg choose_web_cam)">
-     <param name= "usb_cam/pixel_format" value="yuyv"/>
-     <param name= "camera_topic" value="/usb_cam/image_raw"/>
-    <node pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
-   </group>
+    

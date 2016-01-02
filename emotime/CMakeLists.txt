@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+find_package (OpenCV REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -102,13 +102,13 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
-link_directories(${catkin_LIBRARY_DIRS})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/src -I../../../emotime/src/gui -I../../../emotime/include -I /home/lina/finsih_tesfa_work/devel/include")
-SET(EMOTIME_LIBRARY emotime -L../../../emotime/build/src/)
-SET(OpenCV_LIBS opencv_core opencv_imgproc opencv_highgui -L../../../opencv-2.4.11/build/lib/)
+#include_directories(
+#  ${catkin_INCLUDE_DIRS}
+#)
+#link_directories(${catkin_LIBRARY_DIRS})
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/src -I../../../emotime/src/gui -I../../../emotime/include -I /home/lina/finsih_tesfa_work/devel/include")
+#SET(EMOTIME_LIBRARY emotime -L../../../emotime/build/src/)
+#SET(OpenCV_LIBS opencv_core opencv_imgproc opencv_highgui -L../../../opencv-2.4.11/build/lib/)
 #SET(HEADERS_THREE src/VideoCapture.cpp)
 #SET(HEADERS_FOUR src/VideoCapture.h)
 #SET(HEADERS_THREE1 src/ACapture.cpp)
@@ -118,8 +118,17 @@ SET(OpenCV_LIBS opencv_core opencv_imgproc opencv_highgui -L../../../opencv-2.4.
 #SET(HEADERS_ONE src/EmotimeGui.cpp)
 #SET(HEADERS_TWO src/EmotimeGui.h)
 #SET( HEADER_ZERO src/emotimevideo_cli.h)
+catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES faceshift_puppetering
+#  CATKIN_DEPENDS roscpp
+#  DEPENDS system_lib
+)
+include_directories(
+  ${catkin_INCLUDE_DIRS} include
+)
 
-catkin_package(CATKIN_DEPENDS sensor_msgs cv_bridge roscpp std_msgs image_transport usb_cam)
+#catkin_package(CATKIN_DEPENDS sensor_msgs cv_bridge roscpp std_msgs image_transport usb_cam)
 add_executable(emotime_node src/EmoTimeWrap.cpp)
 #${HEADERS_ZERO} ${HEADERS_ONE1} ${HEADERS_TWO1} ${HEADERS_ONE} ${HEADERS_TWO} ${HEADERS_THREE1} ${HEADERS_FOUR1} ${HEADERS_THREE} ${HEADERS_FOUR}
 #)

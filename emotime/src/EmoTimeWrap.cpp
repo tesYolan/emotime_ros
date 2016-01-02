@@ -86,12 +86,12 @@ public:
  // Subscrive to input video feed and sadness_vs_anger_contempt_disgust_fear_happy_neutral_surprise_featspublish output video feed
               counter = 0;
             //nh_.getParam("camera_topic", subscribe_topic);
-          image_sub_ = it_.subscribe("/usb_cam/image_raw", 1, 
+          image_sub_ = it_.subscribe("/chest_camera/image_raw", 1, 
             &EmoTimeWrap::imageCb, this);
             face_location_sub = nh_.subscribe("face_locations", 1, &EmoTimeWrap::list_of_faces_update, this);
             image_pub_ = it_.advertise("/emotime_node/output_video", 1);
             emotion_pub = nh_.advertise<std_msgs::String>("emotion_states", 1000);
-            faces_locations = nh_.advertise<cmt_tracker::Faces>("face_locations", 10);
+            faces_locations = nh_.advertise<cmt_tracker::Faces>("emo_pub_registered", 10);
             method= "svm";
           // config = "/home/lina/Desktop/emotime_final/emotime/resources/haarcascade_frontalface_cbcl1.xml";
           config = "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml";
@@ -102,15 +102,15 @@ public:
           nlambdas= 5; 
           nthetas = 8; 
           
-          classifier_paths.push_back("../svm/anger_vs_contempt_disgust_fear_happy_neutral_sadness_surprise_feats.xml");
-          classifier_paths.push_back("../svm/contempt_vs_anger_disgust_fear_happy_neutral_sadness_surprise_feats.xml");
-          classifier_paths.push_back("../svm/disgust_vs_anger_contempt_fear_happy_neutral_sadness_surprise_feats.xml");
-          classifier_paths.push_back("../svm/fear_vs_anger_contempt_disgust_happy_neutral_sadness_surprise_feats.xml");
-          classifier_paths.push_back("../svm/happy_vs_anger_contempt_disgust_fear_neutral_sadness_surprise_feats.xml");
-          classifier_paths.push_back("../svm/neutral_vs_anger_contempt_disgust_fear_happy_sadness_surprise_feats.xml");
-          classifier_paths.push_back("../svm/sadness_vs_anger_contempt_disgust_fear_happy_neutral_surprise_feats.xml");
-          classifier_paths.push_back("../svm/surprise_vs_anger_contempt_disgust_fear_happy_neutral_sadness_feats.xml");
-
+          classifier_paths.push_back("/home/icog-labs/test_emo/src/emotime_ros/emotime/svm/anger_vs_contempt_disgust_fear_happy_neutral_sadness_surprise_feats.xml");
+          classifier_paths.push_back("/home/icog-labs/test_emo/src/emotime_ros/emotime/svm/contempt_vs_anger_disgust_fear_happy_neutral_sadness_surprise_feats.xml");
+          classifier_paths.push_back("/home/icog-labs/test_emo/src/emotime_ros/emotime/svm/disgust_vs_anger_contempt_fear_happy_neutral_sadness_surprise_feats.xml");
+          classifier_paths.push_back("/home/icog-labs/test_emo/src/emotime_ros/emotime/svm/fear_vs_anger_contempt_disgust_happy_neutral_sadness_surprise_feats.xml");
+          classifier_paths.push_back("/home/icog-labs/test_emo/src/emotime_ros/emotime/svm/happy_vs_anger_contempt_disgust_fear_neutral_sadness_surprise_feats.xml");
+          classifier_paths.push_back("/home/icog-labs/test_emo/src/emotime_ros/emotime/svm/neutral_vs_anger_contempt_disgust_fear_happy_sadness_surprise_feats.xml");
+          classifier_paths.push_back("/home/icog-labs/test_emo/src/emotime_ros/emotime/svm/sadness_vs_anger_contempt_disgust_fear_happy_neutral_surprise_feats.xml");
+          classifier_paths.push_back("/home/icog-labs/test_emo/src/emotime_ros/emotime/svm/surprise_vs_anger_contempt_disgust_fear_happy_neutral_sadness_feats.xml");
+    
           cout<<"Length of the classifiers: "<<classifier_paths.size()<<std::endl;
           preprocessor = new FacePreProcessor(config, config_e, size.width,
           size.height, nwidths, nlambdas, nthetas);
@@ -160,15 +160,19 @@ public:
             ROS_ERROR("cv_bridge exception: %s", e.what());
             return;
           }
+
           Mat img= cv_ptr->image; 
           Mat features; 
+	  cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
           for(int i=0; i<face_locs.faces.size(); i++)
           {
             Mat roi=img(cv::Rect(face_locs.faces[i].pixel_lu.x, face_locs.faces[i].pixel_lu.y,
-                      face_locs.faces[i].width.data, face_locs.faces[i].height.data)).clone(); 
+                    face_locs.faces[i].width.data, face_locs.faces[i].height.data)).clone();
+
+
              bool canPreprocess = preprocessor->preprocess(roi, features);
               if (!canPreprocess) {
-                cout << " " << endl;
+                cout << " Can't Process" << endl;
            }
            else{
               pair<Emotion,float> prediction = emodetector->predict(features);
