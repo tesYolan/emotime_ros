@@ -5,6 +5,10 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+/*********** cmt headers****************/
+#include <cmt_tracker/Face.h>
+#include <cmt_tracker/Faces.h>
+//
 #include "SVMEmoDetector.h"
 #include "BoostEmoDetector.h"
 #include "matrix_io.h"
@@ -20,6 +24,10 @@
 #include <map>
 #include <iostream>
 #include "std_msgs/String.h"
+#include <sstream>
+
+#define SSTR( x ) dynamic_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
 
 using namespace cv;
 using namespace emotime;
@@ -37,9 +45,10 @@ class EmoTimeWrap
   ros::NodeHandle nh_;
   image_transport::ImageTransport it_;
   image_transport::Subscriber image_sub_;
-  
+  ros::Subscriber face_location_sub;
   image_transport::Publisher image_pub_;
   ros::Publisher emotion_pub;
+  ros::Publisher faces_locations;
    std_msgs::String emotion_msg;
   string method;
   string config;
@@ -47,6 +56,7 @@ class EmoTimeWrap
   string profile;
   string eye_glass;
   Size size;
+  int counter;
   int nwidths, nlambdas, nthetas;
   vector<string> classifier_paths;
   FacePreProcessor* preprocessor;
@@ -61,6 +71,9 @@ class EmoTimeWrap
   Point textOrg;
   string emotionString;
   string subscribe_topic;
+
+  cmt_tracker::Faces face_locs;
+  cmt_tracker::Faces emot_pub_faces;
   //string config;
   //string config_e;
 
@@ -71,11 +84,14 @@ public:
   {
     
  // Subscrive to input video feed and sadness_vs_anger_contempt_disgust_fear_happy_neutral_surprise_featspublish output video feed
-          nh_.getParam("camera_topic", subscribe_topic);
-          image_sub_ = it_.subscribe(subscribe_topic, 1, 
+              counter = 0;
+            //nh_.getParam("camera_topic", subscribe_topic);
+          image_sub_ = it_.subscribe("/usb_cam/image_raw", 1, 
             &EmoTimeWrap::imageCb, this);
+            face_location_sub = nh_.subscribe("face_locations", 1, &EmoTimeWrap::list_of_faces_update, this);
             image_pub_ = it_.advertise("/emotime_node/output_video", 1);
             emotion_pub = nh_.advertise<std_msgs::String>("emotion_states", 1000);
+            faces_locations = nh_.advertise<cmt_tracker::Faces>("face_locations", 10);
             method= "svm";
           // config = "/home/lina/Desktop/emotime_final/emotime/resources/haarcascade_frontalface_cbcl1.xml";
           config = "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml";
@@ -119,7 +135,17 @@ public:
           delete emodetector;
           delete preprocessor;
         }
-
+         
+  void list_of_faces_update(const cmt_tracker::Faces& faces_info)
+  {
+    ROS_DEBUG("It get's here in the faces update");
+    face_locs.faces.clear();
+    for (int i = 0; i < faces_info.faces.size(); i++)
+    {
+      face_locs.faces.push_back(faces_info.faces[i]);
+    }
+  }
+  
 
         void imageCb(const sensor_msgs::ImageConstPtr& msg)
         {
@@ -134,11 +160,13 @@ public:
             ROS_ERROR("cv_bridge exception: %s", e.what());
             return;
           }
-          
           Mat img= cv_ptr->image; 
           Mat features; 
-          
-           bool canPreprocess = preprocessor->preprocess(img, features);
+          for(int i=0; i<face_locs.faces.size(); i++)
+          {
+            Mat roi=img(cv::Rect(face_locs.faces[i].pixel_lu.x, face_locs.faces[i].pixel_lu.y,
+                      face_locs.faces[i].width.data, face_locs.faces[i].height.data)).clone(); 
+             bool canPreprocess = preprocessor->preprocess(roi, features);
               if (!canPreprocess) {
                 cout << " " << endl;
            }
@@ -148,18 +176,42 @@ public:
               emotion_msg.data = emotionStrings(prediction.first);
                ROS_INFO("%s", emotion_msg.data.c_str());
           
-      }
-
-          
-          cv::putText(img, emotionString, textOrg, fontFace, fontScale, Scalar::all(255), thickness, lineType);
+               }
+            cv::putText(roi, emotionString, textOrg, fontFace, fontScale, CV_RGB(255,255,0), thickness, lineType);
           // Output modified video stream
-           cv::imshow(OPENCV_WINDOW, cv_ptr->image);
+
+
+std::string s = SSTR( i );
+
+           cv::imshow(s, roi);
           cv::waitKey(3);
           emotion_pub.publish(emotion_msg);
           image_pub_.publish(cv_ptr->toImageMsg());
-          while(nh_.ok()){
-               ros::spinOnce();
+
+          cmt_tracker::Face face_description;
+
+          face_description.pixel_lu.x = face_locs.faces[i].pixel_lu.x;
+          face_description.pixel_lu.y = face_locs.faces[i].pixel_lu.y;
+          //Now place coordinates to the value Z from the
+          //depth camera.
+          face_description.pixel_lu.z = 0;
+          face_description.height.data = face_locs.faces[i].height.data;
+          face_description.width.data = face_locs.faces[i].width.data;
+          face_description.quality.data = true;
+          face_description.id.data = counter;
+          counter++;
+          face_description.name.data = "Name";
+          face_description.emotion_states.data = emotionString;
+
+          emot_pub_faces.faces.push_back(face_description);
+          
           }
+          faces_locations.publish(emot_pub_faces);
+          face_locs.faces.clear();
+          emot_pub_faces.faces.clear();
+
+          
+          
        
         }
       };

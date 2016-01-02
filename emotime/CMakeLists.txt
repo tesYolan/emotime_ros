@@ -106,7 +106,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 link_directories(${catkin_LIBRARY_DIRS})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/src -I../../../emotime/src/gui -I../../../emotime/include ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/src -I../../../emotime/src/gui -I../../../emotime/include -I /home/lina/finsih_tesfa_work/devel/include")
 SET(EMOTIME_LIBRARY emotime -L../../../emotime/build/src/)
 SET(OpenCV_LIBS opencv_core opencv_imgproc opencv_highgui -L../../../opencv-2.4.11/build/lib/)
 #SET(HEADERS_THREE src/VideoCapture.cpp)
