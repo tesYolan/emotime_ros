@@ -71,6 +71,7 @@ class EmoTimeWrap
 //cv::Point textOrg(10, 130);
   Point textOrg;
   string emotionString;
+  float emotionAccuracy; 
   string subscribe_topic;
 
   cmt_tracker_msgs::Faces face_locs;
@@ -119,7 +120,7 @@ public:
 
     emodetector = new SVMEmoDetector(kCfactor, kMaxIteration, kErrorMargin);
     emodetector->init(classifier_paths);
-    text = "Funny text inside the box";
+    //text = "Funny text inside the box";
     fontFace = FONT_HERSHEY_SCRIPT_SIMPLEX;
     fontScale = 2;
     thickness = 3;
@@ -179,6 +180,7 @@ public:
       else {
         pair<Emotion, float> prediction = emodetector->predict(features);
         emotionString = emotionStrings(prediction.first);
+        emotionAccuracy = prediction.second;
         //emotion_msg.data = emotionStrings(prediction.first);
        // ROS_INFO("%s", emotion_msg.data.c_str());
 
@@ -208,7 +210,7 @@ public:
       counter++;
       face_description.name.data = "Name";
       face_description.emotion_states.data = emotionString;
-
+      face_description.emo_accuracy.data = emotionAccuracy;
       emot_pub_faces.faces.push_back(face_description);
 
     }
